@@ -34,7 +34,8 @@ namespace net {
 typedef std::function<void(Error, bufferevent *)> ConnectBaseCb;
 
 template <MK_MOCK(evutil_parse_sockaddr_port), MK_MOCK(bufferevent_socket_new),
-        MK_MOCK(bufferevent_set_timeouts), MK_MOCK(bufferevent_socket_connect)>
+        MK_MOCK(bufferevent_set_timeouts), MK_MOCK(bufferevent_socket_connect),
+        MK_MOCK(bufferevent_set_cb), MK_MOCK(bufferevent_free)>
 void connect_base(std::string address, int port, ConnectBaseCb cb,
         double timeout = 10.0, Poller *poller = Poller::global(),
         Logger *logger = Logger::global()) {
