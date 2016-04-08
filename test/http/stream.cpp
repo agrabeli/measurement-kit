@@ -14,15 +14,15 @@
 
 #include "src/http/stream.hpp"
 #include "src/common/check_connectivity.hpp"
+#include <unistd.h>
 
 using namespace mk;
 using namespace mk::net;
 using namespace mk::http;
 
 TEST_CASE("HTTP stream works as expected") {
-    if (CheckConnectivity::is_down()) {
-        return;
-    }
+    if (CheckConnectivity::is_down()) {return;}
+    auto finish = false;
     auto stream = std::make_shared<Stream>(Settings{
         {"address", "www.google.com"}, {"port", 80},
     });
@@ -47,6 +47,7 @@ TEST_CASE("HTTP stream works as expected") {
                 stream->on_end([&](void) {
                     std::cout << "\r\n";
                     stream->close();
+                    finish = true;
                     mk::break_loop();
                 });
                 stream->on_body([&](std::string && /*chunk*/) {
@@ -55,6 +56,9 @@ TEST_CASE("HTTP stream works as expected") {
             });
     });
     mk::loop();
+    while (! finish) {
+        usleep (5000000);
+    }
 }
 
 TEST_CASE("HTTP stream is robust to EOF") {
@@ -92,9 +96,8 @@ TEST_CASE("HTTP stream is robust to EOF") {
 }
 
 TEST_CASE("HTTP stream works as expected when using Tor") {
-    if (CheckConnectivity::is_down()) {
-        return;
-    }
+    if (CheckConnectivity::is_down()) {return;}
+    auto finish = false;
     auto stream = std::make_shared<Stream>(Settings{
         {"address", "www.google.com"},
         {"port", 80},
@@ -127,6 +130,7 @@ TEST_CASE("HTTP stream works as expected when using Tor") {
                 stream->on_end([&](void) {
                     std::cout << "\r\n";
                     stream->close();
+                    finish = true;
                     mk::break_loop();
                 });
                 stream->on_body([&](std::string && /*chunk*/) {
@@ -135,12 +139,14 @@ TEST_CASE("HTTP stream works as expected when using Tor") {
             });
     });
     mk::loop();
+    while (! finish) {
+        usleep (5000000);
+    }
 }
 
 TEST_CASE("HTTP stream receives connection errors") {
-    if (CheckConnectivity::is_down()) {
-        return;
-    }
+    if (CheckConnectivity::is_down()) {return;}
+    auto finish = false;
     auto stream = std::make_shared<Stream>(Settings{
         {"address", "nexa.polito.it"}, {"port", "81"},
     });
@@ -148,7 +154,11 @@ TEST_CASE("HTTP stream receives connection errors") {
     stream->on_error([&](Error e) {
         mk::debug("Connection error: %d", (int)e);
         stream->close();
+        finish = true;
         mk::break_loop();
     });
     mk::loop();
+    while (! finish) {
+        usleep (5000000);
+    }
 }
