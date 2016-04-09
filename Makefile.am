@@ -30,6 +30,8 @@ check_PROGRAMS = $(ALL_TESTS)
 
 VALGRIND = valgrind --trace-children=yes --error-exitcode=1                    \
                     --dsymutil=yes --leak-check=yes                            \
+					--gen-suppressions=all --show-leak-kinds=definite		   \
+					--errors-for-leak-kinds=definite                           \
 					--suppressions=build/travis/measurement_kit.supp
 
 run-valgrind: $(check_PROGRAMS)
