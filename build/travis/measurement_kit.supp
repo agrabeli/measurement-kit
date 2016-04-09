@@ -1,0 +1,36 @@
+{
+   <test/net/buffer leak suppression>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:calloc
+   fun:evbuffer_new
+   fun:_ZL30____C_A_T_C_H____T_E_S_T____32v
+   fun:invoke
+   fun:invokeActiveTestCase
+   fun:runCurrentTest
+   fun:runTest
+   fun:_ZN5Catch6Runner8runTestsEv
+   fun:_ZN5Catch7Session3runEv
+   fun:run
+   fun:main
+}
+{
+   <test/net/connection leak suppression>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:calloc
+   fun:bufferevent_socket_new
+   fun:operator()
+   fun:make
+   fun:_ZN2mk3net10ConnectionC1EPKcS3_S3_PNS_6PollerEPNS_6LoggerEi
+   fun:Connection
+   fun:_ZL30____C_A_T_C_H____T_E_S_T____74v
+   fun:invoke
+   fun:invokeActiveTestCase
+   fun:runCurrentTest
+   fun:runTest
+   fun:_ZN5Catch6Runner8runTestsEv
+   fun:_ZN5Catch7Session3runEv
+   fun:run
+   fun:main
+}
