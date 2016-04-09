@@ -1,5 +1,5 @@
 {
-   <test/net/buffer leak suppression>
+   <test_net_buffer_leak_suppression>
    Memcheck:Leak
    match-leak-kinds: definite
    fun:calloc
@@ -15,7 +15,7 @@
    fun:main
 }
 {
-   <test/net/connection leak suppression>
+   <test_net_connection_leak_suppression>
    Memcheck:Leak
    match-leak-kinds: definite
    fun:calloc
