@@ -76,6 +76,6 @@ int main(int argc, char **argv) {
                 std::cout << "< site: " << reply.site << "\n";
                 std::cout << "< country: " << reply.country << "\n";
                 break_loop();
-            }, query);
+            }, {}, query);
     });
 }

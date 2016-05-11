@@ -66,7 +66,7 @@ ErrorOr<std::string> Query::as_query() {
 }
 
 void query(std::string tool, Callback<Error, Reply> callback,
-           Query request) {
+           Settings settings, Query request) {
     ErrorOr<std::string> query = request.as_query();
     if (!query) {
         callback(query.as_error(), Reply());
@@ -81,10 +81,9 @@ void query(std::string tool, Callback<Error, Reply> callback,
     url += tool;
     url += *query;
     mk::debug("about to call the request function");
-    http::request(
-        {
-            {"http/method", "GET"}, {"http/url", url},
-        },
+    settings["http/method"] = "GET";
+    settings["http/url"] = url;
+    http::request(settings,
         [callback](Error error, http::Response response) {
             if (error) {
                 callback(error, Reply());

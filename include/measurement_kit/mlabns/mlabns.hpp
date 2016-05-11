@@ -100,7 +100,7 @@ class Reply {
 /// \param callback Callback called on response or error.
 /// \param request Optional request parameters.
 void query(std::string tool, Callback<Error, Reply> callback,
-           Query request = nullptr);
+           Settings settings, Query request = nullptr);
 
 } // namespace mlabns
 } // namespace mk
