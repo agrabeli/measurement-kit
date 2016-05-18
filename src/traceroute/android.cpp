@@ -35,9 +35,9 @@
 // This is meant to run on Android but can run on all Linux systems
 #ifdef __linux__
 
+#include "src/common/utils.hpp"
 #include <measurement_kit/common/error.hpp>
 #include <measurement_kit/common/logger.hpp>
-#include "src/common/utils.hpp"
 #include <measurement_kit/traceroute/android.hpp>
 #include <measurement_kit/traceroute/error.hpp>
 #include <measurement_kit/traceroute/interface.hpp>
@@ -60,6 +60,31 @@
 #include <time.h>
 #include <unistd.h>
 
+extern "C" {
+
+void event_callback(int, short event, void *opaque) {
+    AndroidProber *prober = static_cast<AndroidProber *>(opaque);
+
+    prober->logger->debug("event_callback(_, %d, %p)", event, opaque);
+
+    if ((event & EV_TIMEOUT) != 0) {
+        prober->on_timeout();
+        prober->timeout_cb_();
+    } else if ((event & EV_READ) != 0) {
+        ProbeResult result;
+        try {
+            result = prober->on_socket_readable();
+        } catch (Error &error) {
+            prober->error_cb_(error);
+            return;
+        }
+        prober->result_cb_(result);
+    } else {
+        throw std::runtime_error("Unexpected event error");
+    }
+}
+}
+
 struct event_base;
 
 namespace mk {
@@ -81,7 +106,7 @@ void AndroidProber::init() {
     const int val = 1;
 
     logger->debug("AndroidProber(%d, %d, %p) => %p", use_ipv4_, port_,
-              (void *)evbase_, (void *)this);
+                  (void *)evbase_, (void *)this);
 
     if (use_ipv4_) {
         level_sock = SOL_IP;
@@ -142,8 +167,8 @@ void AndroidProber::send_probe(std::string addr, int port, int ttl,
 
     init();
 
-    logger->debug("send_probe(%s, %d, %d, %lu)", addr.c_str(), port,
-              ttl, payload.length());
+    logger->debug("send_probe(%s, %d, %d, %lu)", addr.c_str(), port, ttl,
+                  payload.length());
 
     if (sockfd_ < 0) {
         error_cb_(SocketAlreadyClosedError()); // already close()d
@@ -219,7 +244,8 @@ ProbeResult AndroidProber::on_socket_readable() {
 
     logger->debug("on_socket_readable()");
 
-    if (!probe_pending_) throw NoProbePendingError();
+    if (!probe_pending_)
+        throw NoProbePendingError();
     probe_pending_ = false;
 
     r.is_ipv4 = use_ipv4_;
@@ -358,31 +384,9 @@ double AndroidProber::calculate_rtt(struct timespec end,
     long tmp = NSEC_PER_SEC * temp.tv_sec;
     tmp += temp.tv_nsec;
     double rtt_ms = (double)tmp / MICROSEC_PER_SEC;
-    if (rtt_ms < 0) rtt_ms = -1.0; // XXX
+    if (rtt_ms < 0)
+        rtt_ms = -1.0; // XXX
     return rtt_ms;
-}
-
-void AndroidProber::event_callback(int, short event, void *opaque) {
-    AndroidProber *prober = static_cast<AndroidProber *>(opaque);
-
-    prober->logger->debug("event_callback(_, %d, %p)", event, opaque);
-
-    if ((event & EV_TIMEOUT) != 0) {
-        prober->on_timeout();
-        prober->timeout_cb_();
-
-    } else if ((event & EV_READ) != 0) {
-        ProbeResult result;
-        try {
-            result = prober->on_socket_readable();
-        } catch (Error &error) {
-            prober->error_cb_(error);
-            return;
-        }
-        prober->result_cb_(result);
-
-    } else
-        throw std::runtime_error("Unexpected event error");
 }
 
 void AndroidProber::cleanup() {

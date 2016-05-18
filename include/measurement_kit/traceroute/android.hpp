@@ -148,12 +148,6 @@ class AndroidProber : public NonCopyable,
     /// \return ttl of the error message
     static int get_ttl(void *data) { return *((int *)data); }
 
-    /// Callback invoked when the socket is readable
-    /// \param so Socket descriptor
-    /// \param event Event that occurred
-    /// \param ptr Opaque pointer to this class
-    static void event_callback(int so, short event, void *ptr);
-
     /// Idempotent cleanup function
     void cleanup();
 };
