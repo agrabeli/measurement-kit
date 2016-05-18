@@ -96,6 +96,16 @@ TEST_CASE("Check whether it works when destination sends reply") {
     });
 }
 
+TEST_CASE("Make sure that the init function can handle a fail of event_new") {
+    auto prober = Prober<AndroidProber>(true, 11829);
+    // prober.init();
+    // XXX I'm blocked here because I don't know what is the best wait of
+    // refacoring the code (trying to change less code possible) 
+    // to make some methods visible, like the init method
+    // that is a private method of the class
+
+}
+
 #else
 int main() { return 0; }
 #endif

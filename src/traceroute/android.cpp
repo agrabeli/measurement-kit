@@ -93,6 +93,7 @@ namespace traceroute {
 AndroidProber::AndroidProber(bool a, int port, event_base *c, Var<Logger> l)
     : use_ipv4_(a), evbase_(c), port_(port), logger(l) {}
 
+template <MK_MOCK(event_new)>
 void AndroidProber::init() {
 
     if (sockfd_ >= 0 && evp_ != nullptr)
@@ -157,6 +158,7 @@ void AndroidProber::init() {
     }
 }
 
+template<MK_MOCK(event_add)>
 void AndroidProber::send_probe(std::string addr, int port, int ttl,
                                std::string payload, double timeout) {
 
